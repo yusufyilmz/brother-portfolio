@@ -35,13 +35,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
 	return (
 		<html lang="en">
-			<body className="min-h-screen bg-background text-ink antialiased">
+			<body className="min-h-screen bg-background text-ink antialiased m-0 p-0">
 				<style dangerouslySetInnerHTML={{ __html: cssVariables }} />
 				<SiteHeader />
-				<main>{children}</main>
+				<main className="m-0 p-0">{children}</main>
 				<SiteFooter />
 			</body>
 		</html>
 	);
 }
-

@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { siteCopy } from "@/config/siteCopy";
-import { YouTubePlayer } from "@/components/work/youtube-player";
 import { MediaCarousel } from "@/components/features/media-carousel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,26 +40,34 @@ export default function WorkDetailPage({ params }: WorkDetailPageProps) {
 		notFound();
 	}
 
-	const hasVideo = !!work.videoUrl;
-	const hasImages = work.images && work.images.length > 0;
+	const imageSources: string[] =
+		// Prefer explicit images array if provided
+		Array.isArray((work as any).images) && (work as any).images.length > 0
+			? (work as any).images
+			: // Fallback to single imageUrl as a one-item gallery
+				(work as any).imageUrl
+				? [(work as any).imageUrl]
+				: [];
+
+	const videoSources: string[] =
+		Array.isArray((work as any).videos) && (work as any).videos.length > 0
+			? (work as any).videos
+			: [];
+
+	const hasImageSlider = imageSources.length > 0;
+	const hasVideoSlider = videoSources.length > 0;
 
 	return (
 		<div className="min-h-screen">
-			{/* Back Button */}
-			<section className="pt-24 md:pt-32 pb-8">
-				<div className="container">
+			{/* Header (matches Work page style, no background strip) */}
+			<section className="section pt-24 md:pt-32">
+				<div className="container space-y-6">
 					<Button asChild variant="ghost" size="sm">
 						<Link href="/work">
 							<ChevronLeft className="mr-2 h-4 w-4" />
 							Back to Work
 						</Link>
 					</Button>
-				</div>
-			</section>
-
-			{/* Header */}
-			<section className="pb-12">
-				<div className="container">
 					<div className="max-w-4xl space-y-4">
 						<div className="flex items-center gap-3">
 							<Badge variant="secondary">{work.category}</Badge>
@@ -79,30 +86,49 @@ export default function WorkDetailPage({ params }: WorkDetailPageProps) {
 			{/* Media Content */}
 			<section className="section">
 				<div className="container">
-					<div className="max-w-6xl mx-auto space-y-8">
-						{/* Video Player */}
-						{hasVideo && (
-							<div className="rounded-lg overflow-hidden shadow-2xl">
-								<YouTubePlayer url={work.videoUrl!} />
+					<div className="space-y-10">
+						{/* Image Gallery */}
+						{hasImageSlider && (
+							<div className="space-y-4">
+								<h2 className="text-xl font-semibold">Image Gallery</h2>
+								<div className="rounded-lg overflow-hidden">
+									<MediaCarousel
+										items={imageSources.map((src, index) => ({
+											src,
+											alt: `${work.title} - Image ${index + 1}`,
+											type: "image",
+										}))}
+										aspectRatio="aspect-video"
+										showNavigation={true}
+										showDots={true}
+										videoProps={{
+											showControls: false,
+										}}
+									/>
+								</div>
 							</div>
 						)}
 
-						{/* Image Gallery */}
-						{hasImages && (
-							<div className="rounded-lg overflow-hidden">
-								<MediaCarousel
-									items={work.images!.map((img, index) => ({
-										src: img,
-										alt: `${work.title} - Image ${index + 1}`,
-										type: "image",
-									}))}
-									aspectRatio="aspect-video"
-									showNavigation={true}
-									showDots={true}
-									videoProps={{
-										showControls: false,
-									}}
-								/>
+						{/* Video Gallery */}
+						{hasVideoSlider && (
+							<div className="space-y-4">
+								<h2 className="text-xl font-semibold">Video Gallery</h2>
+								<div className="rounded-lg overflow-hidden">
+									<MediaCarousel
+										items={videoSources.map((src, index) => ({
+											src,
+											alt: `${work.title} - Video ${index + 1}`,
+											type: "video",
+										}))}
+										aspectRatio="aspect-video"
+										showNavigation={true}
+										showDots={true}
+										videoProps={{
+											showControls: true,
+											muted: false,
+										}}
+									/>
+								</div>
 							</div>
 						)}
 					</div>
@@ -110,7 +136,7 @@ export default function WorkDetailPage({ params }: WorkDetailPageProps) {
 			</section>
 
 			{/* Related Work or CTA */}
-			<section className="section bg-surface/30">
+			<section className="section">
 				<div className="container">
 					<div className="max-w-3xl mx-auto text-center space-y-6">
 						<h2 className="text-2xl md:text-3xl font-bold">
@@ -133,4 +159,3 @@ export default function WorkDetailPage({ params }: WorkDetailPageProps) {
 		</div>
 	);
 }
-

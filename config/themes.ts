@@ -59,4 +59,3 @@ export const themes: Record<ThemeId, ThemeDefinition> = {
 export const activeThemeId: ThemeId = "dark";
 
 export const activeTheme = themes[activeThemeId];
-

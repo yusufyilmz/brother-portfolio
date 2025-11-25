@@ -28,9 +28,7 @@ export function NavigationDots({
 						onClick={() => onDotClick?.(index)}
 						className={cn(
 							"h-2 rounded-full transition-all duration-300",
-							isActive
-								? "w-8 bg-accent"
-								: "w-2 bg-muted/40 hover:bg-muted/60",
+							isActive ? "w-8 bg-accent" : "w-2 bg-muted/40 hover:bg-muted/60",
 						)}
 						aria-label={ariaLabel?.(index) || `Go to item ${index + 1}`}
 						aria-current={isActive ? "true" : undefined}
@@ -40,4 +38,3 @@ export function NavigationDots({
 		</div>
 	);
 }
-

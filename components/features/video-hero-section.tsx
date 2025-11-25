@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { siteCopy } from "@/config/siteCopy";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 export function HeroSection() {
 	const copy = siteCopy.hero;
@@ -21,7 +22,7 @@ export function HeroSection() {
 
 	return (
 		<section className="relative isolate h-screen w-full overflow-hidden">
-			{/* Background video or gradient */}
+			{/* Background video or image */}
 			<div className="absolute inset-0 w-full h-full">
 				{copy.video ? (
 					<video
@@ -36,9 +37,7 @@ export function HeroSection() {
 					>
 						Your browser does not support the video tag.
 					</video>
-				) : (
-					<div className="w-full h-full bg-gradient-to-br from-background via-surface to-background" />
-				)}
+				) : null}
 				{/* Overlay for readability */}
 				<div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(0,0,0,0.28),_transparent_55%),linear-gradient(to_bottom,rgba(0,0,0,0.45),rgba(0,0,0,0.55))]" />
 			</div>

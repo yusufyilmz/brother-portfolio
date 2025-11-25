@@ -16,8 +16,17 @@ export function SiteHeader() {
 		{ label: siteCopy.navigation.contact, href: "/contact" },
 	];
 
+	const isHome = pathname === "/";
+
 	return (
-		<header className="sticky top-0 z-50 w-full border-b border-muted/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+		<header
+			className={cn(
+				"fixed top-0 z-50 w-full transition-colors duration-300",
+				isHome
+					? "border-transparent bg-transparent"
+					: "border-b border-muted/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
+			)}
+		>
 			<div className="container mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex h-16 items-center justify-between">
 					{/* Logo / Name */}
@@ -36,9 +45,7 @@ export function SiteHeader() {
 								href={item.href}
 								className={cn(
 									"text-sm font-medium transition-colors hover:text-accent",
-									pathname === item.href
-										? "text-accent"
-										: "text-muted",
+									pathname === item.href ? "text-accent" : "text-muted",
 								)}
 							>
 								{item.label}
@@ -70,9 +77,7 @@ export function SiteHeader() {
 								href={item.href}
 								className={cn(
 									"block py-2 text-base font-medium transition-colors hover:text-accent",
-									pathname === item.href
-										? "text-accent"
-										: "text-muted",
+									pathname === item.href ? "text-accent" : "text-muted",
 								)}
 								onClick={() => setMobileMenuOpen(false)}
 							>
@@ -85,4 +90,3 @@ export function SiteHeader() {
 		</header>
 	);
 }
-

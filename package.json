@@ -1,5 +1,5 @@
 {
-	"name": "brother-portfolio",
+	"name": "yunus-portfolio",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
@@ -10,7 +10,9 @@
 		"format": "biome format .",
 		"format:fix": "biome format --write .",
 		"type-check": "tsc --noEmit",
-		"fetch-videos": "tsx scripts/fetch-videos.ts"
+		"fetch-videos": "tsx scripts/fetch-videos.ts",
+		"check-api-key": "tsx scripts/check-api-key.ts",
+		"test-channel-videos": "tsx scripts/test-channel-videos.ts"
 	},
 	"dependencies": {
 		"@radix-ui/react-slot": "^1.0.2",
@@ -36,4 +38,3 @@
 		"typescript": "5.6.2"
 	}
 }
-

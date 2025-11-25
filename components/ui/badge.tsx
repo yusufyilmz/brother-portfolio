@@ -9,8 +9,7 @@ const badgeVariants = cva(
 			variant: {
 				default:
 					"border-transparent bg-accent text-white shadow hover:bg-accent/80",
-				secondary:
-					"border-transparent bg-surface text-ink hover:bg-surface/80",
+				secondary: "border-transparent bg-surface text-ink hover:bg-surface/80",
 				outline: "text-ink border-muted/30",
 			},
 		},
@@ -31,4 +30,3 @@ function Badge({ className, variant, ...props }: BadgeProps) {
 }
 
 export { Badge, badgeVariants };
-

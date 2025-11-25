@@ -19,10 +19,14 @@
 	body {
 		@apply bg-background text-ink;
 		font-feature-settings: "rlig" 1, "calt" 1;
+		margin: 0;
+		padding: 0;
 	}
 
 	html {
 		scroll-behavior: smooth;
+		margin: 0;
+		padding: 0;
 	}
 }
 
@@ -34,5 +38,8 @@
 	.section {
 		@apply py-16 md:py-24;
 	}
-}
 
+	main {
+		margin-top: -20px !important;
+	}
+}

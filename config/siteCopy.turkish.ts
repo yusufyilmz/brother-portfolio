@@ -11,7 +11,6 @@ export const siteCopyTurkish = {
 			"video prodüksiyonu",
 			"sinematografi",
 			"fotoğrafçılık",
-			"yaratıcı yönetmen",
 			"videograf",
 			"film yapımcısı",
 		] as const,
@@ -27,7 +26,7 @@ export const siteCopyTurkish = {
 		secondaryCtaHref: "/contact",
 		highlightNote: "Projeler için müsait · [Konum] merkezli",
 		// Hero video veya görsel buraya eklenebilir
-		video: "/media/hero-reel.mp4", // Gerçek dosya ile güncellenecek
+		video: "/media/hero.mp4", // Gerçek dosya ile güncellenecek
 	},
 	work: {
 		sectionTitle: "Seçilmiş Çalışmalar",
@@ -40,9 +39,8 @@ export const siteCopyTurkish = {
 				title: "Proje Başlığı 1",
 				category: "Video Prodüksiyonu",
 				description: "Projenin kısa açıklaması",
-				// Paylaştığınız playlist'ten YouTube video URL'i
-				videoUrl: "https://youtu.be/VSm6psGvRwM",
-				thumbnailUrl: "/media/project-1-thumb.jpg",
+				images: ["/media/image1.jpg", "/media/image2.jpg", "/media/image3.jpg"],
+				videoUrl: "", // Video URL'si buraya eklenecek (örn: "/media/video1.mp4" veya YouTube URL)
 				year: "2025",
 			},
 			{
@@ -50,8 +48,8 @@ export const siteCopyTurkish = {
 				title: "Proje Başlığı 2",
 				category: "Sinematografi",
 				description: "Projenin kısa açıklaması",
-				videoUrl: "", // Başka bir video URL'i eklenebilir
-				thumbnailUrl: "/media/project-2-thumb.jpg",
+				images: ["/media/image2.jpg"],
+				videoUrl: "", // Video URL'si buraya eklenecek
 				year: "2025",
 			},
 			{
@@ -59,14 +57,28 @@ export const siteCopyTurkish = {
 				title: "Proje Başlığı 3",
 				category: "Fotoğrafçılık",
 				description: "Projenin kısa açıklaması",
-				images: [
-					"/media/photo-1.jpg",
-					"/media/photo-2.jpg",
-					"/media/photo-3.jpg",
-				],
-				thumbnailUrl: "/media/project-3-thumb.jpg",
-				year: "2024",
+				images: ["/media/image3.jpg"],
+				videoUrl: "", // Video URL'si buraya eklenecek
+				year: "2025",
 			},
+		],
+	},
+	youtube: {
+		sectionTitle: "YouTube Kanalları",
+		sectionIntro:
+			"Farklı formatlarda içerik ürettiğimiz aktif YouTube kanalları. Aşağıdan kanalları inceleyip yayınlanan son videolara göz atabilirsiniz.",
+		channels: [
+			{
+				id: "exeetyb",
+				handle: "@EXEETYB",
+				channelUrl: "https://www.youtube.com/@EXEETYB",
+				label: "EXEETYB",
+				tagline: "Oyun & eğlence içerikleri",
+				fallbackDescription:
+					"Ekip tarafından hazırlanan oyun, eğlence ve günlük vlog içerikleri. İçerik temposu yüksek, izleyicilerle aktif etkileşim kuruyor.",
+				maxResults: 6,
+			},
+			// Yeni kanallar bu listeye eklenebilir
 		],
 	},
 	about: {
@@ -116,4 +128,3 @@ export const siteCopyTurkish = {
 };
 
 export type SiteCopyTurkish = typeof siteCopyTurkish;
-

@@ -1,122 +1,193 @@
-#!/usr/bin/env tsx
-/**
- * Script to fetch YouTube videos and update siteCopy
- * 
- * Usage:
- *   YOUTUBE_API_KEY=your_api_key npm run fetch-videos -- --channel-url "https://www.youtube.com/@username"
- *   YOUTUBE_API_KEY=your_api_key npm run fetch-videos -- --video-url "https://youtu.be/VSm6psGvRwM"
- *   YOUTUBE_API_KEY=your_api_key npm run fetch-videos -- --channel-id "UCxxxxx"
- */
-
-import { fetchYouTubeVideos } from "../utils/fetch-youtube-videos";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 
-const args = process.argv.slice(2);
-
-function getArgValue(arg: string): string | undefined {
-	const index = args.indexOf(arg);
-	if (index !== -1 && args[index + 1]) {
-		return args[index + 1];
+// Load .env.local if it exists
+const envLocalPath = join(process.cwd(), ".env.local");
+if (existsSync(envLocalPath)) {
+	const envContent = readFileSync(envLocalPath, "utf-8");
+	const envLines = envContent.split("\n");
+	for (const line of envLines) {
+		const trimmed = line.trim();
+		if (trimmed && !trimmed.startsWith("#")) {
+			const [key, ...valueParts] = trimmed.split("=");
+			if (key && valueParts.length > 0) {
+				const value = valueParts
+					.join("=")
+					.trim()
+					.replace(/^["']|["']$/g, "");
+				process.env[key.trim()] = value;
+			}
+		}
 	}
-	return undefined;
 }
 
+export interface YouTubeVideo {
+	videoId: string;
+	videoUrl: string;
+	title: string;
+	description: string;
+	thumbnailUrl: string;
+	publishedAt: string;
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+	const res = await fetch(url);
+	if (!res.ok) {
+		const text = await res.text();
+		throw new Error(
+			`YouTube API error (${res.status}): ${text || res.statusText}`,
+		);
+	}
+	return (await res.json()) as T;
+}
+
+/**
+ * 1) Resolve @handle -> channelId
+ */
+export async function resolveChannelIdFromHandle(
+	apiKey: string,
+	handle: string,
+): Promise<string> {
+	const cleanHandle = handle.startsWith("@") ? handle.slice(1) : handle;
+
+	const url =
+		"https://www.googleapis.com/youtube/v3/channels" +
+		`?part=id&forHandle=${encodeURIComponent(cleanHandle)}` +
+		`&key=${encodeURIComponent(apiKey)}`;
+
+	const data = await fetchJson<{
+		items?: { id: string }[];
+	}>(url);
+
+	if (!data.items || data.items.length === 0) {
+		throw new Error(`Could not resolve channelId for handle: ${handle}`);
+	}
+
+	return data.items[0].id;
+}
+
+/**
+ * 2) Get uploads playlist ID for a given channelId
+ */
+export async function getUploadsPlaylistId(
+	apiKey: string,
+	channelId: string,
+): Promise<string> {
+	const url =
+		"https://www.googleapis.com/youtube/v3/channels" +
+		`?part=contentDetails&id=${encodeURIComponent(channelId)}` +
+		`&key=${encodeURIComponent(apiKey)}`;
+
+	const data = await fetchJson<{
+		items?: {
+			contentDetails: {
+				relatedPlaylists: { uploads: string };
+			};
+		}[];
+	}>(url);
+
+	const uploads =
+		data.items?.[0]?.contentDetails?.relatedPlaylists?.uploads ?? null;
+
+	if (!uploads) {
+		throw new Error(
+			`Could not find uploads playlist for channelId: ${channelId}`,
+		);
+	}
+
+	return uploads;
+}
+
+/**
+ * 3) Fetch videos from the uploads playlist
+ */
+export async function getVideosFromUploadsPlaylist(
+	apiKey: string,
+	uploadsPlaylistId: string,
+	maxResults = 20,
+): Promise<YouTubeVideo[]> {
+	const url =
+		"https://www.googleapis.com/youtube/v3/playlistItems" +
+		`?part=snippet,contentDetails&playlistId=${encodeURIComponent(
+			uploadsPlaylistId,
+		)}` +
+		`&maxResults=${maxResults}` +
+		`&key=${encodeURIComponent(apiKey)}`;
+
+	const data = await fetchJson<{
+		items?: {
+			contentDetails: { videoId: string; videoPublishedAt?: string };
+			snippet: {
+				title: string;
+				description: string;
+				publishedAt: string;
+				thumbnails?: {
+					high?: { url: string };
+					medium?: { url: string };
+					default?: { url: string };
+				};
+			};
+		}[];
+	}>(url);
+
+	if (!data.items || data.items.length === 0) {
+		return [];
+	}
+
+	return data.items.map((item) => {
+		const vid = item.contentDetails.videoId;
+		const snippet = item.snippet;
+		const thumbs = snippet.thumbnails || {};
+		const thumbUrl =
+			thumbs.high?.url || thumbs.medium?.url || thumbs.default?.url || "";
+
+		return {
+			videoId: vid,
+			videoUrl: `https://www.youtube.com/watch?v=${vid}`,
+			title: snippet.title,
+			description: snippet.description,
+			thumbnailUrl: thumbUrl,
+			publishedAt: item.contentDetails.videoPublishedAt ?? snippet.publishedAt,
+		};
+	});
+}
+
+/**
+ * 4) Convenience: everything in one call, starting from @handle
+ */
+export async function getChannelUploadsByHandle(
+	apiKey: string,
+	handle: string,
+	maxResults = 20,
+): Promise<YouTubeVideo[]> {
+	const channelId = await resolveChannelIdFromHandle(apiKey, handle);
+	const uploadsId = await getUploadsPlaylistId(apiKey, channelId);
+	return getVideosFromUploadsPlaylist(apiKey, uploadsId, maxResults);
+}
 async function main() {
 	const apiKey = process.env.YOUTUBE_API_KEY;
 	if (!apiKey) {
-		console.error("Error: YOUTUBE_API_KEY environment variable is required");
-		console.error("Get your API key from: https://console.cloud.google.com/apis/credentials");
+		console.error("Missing YOUTUBE_API_KEY");
 		process.exit(1);
 	}
-	
-	const channelUrl = getArgValue("--channel-url");
-	const videoUrl = getArgValue("--video-url");
-	const channelId = getArgValue("--channel-id");
-	const channelUsername = getArgValue("--channel-username");
-	const maxResults = parseInt(getArgValue("--max") || "50", 10);
-	
-	if (!channelUrl && !videoUrl && !channelId && !channelUsername) {
-		console.error("Error: Please provide one of:");
-		console.error("  --channel-url <url>");
-		console.error("  --video-url <url>");
-		console.error("  --channel-id <id>");
-		console.error("  --channel-username <username>");
-		process.exit(1);
-	}
-	
-	console.log("Fetching videos from YouTube...");
-	
+
+	const handle = "@EXEETYB";
+
+	console.log("Fetching uploads for", handle);
+
 	try {
-		const videos = await fetchYouTubeVideos({
-			apiKey,
-			channelUrl,
-			videoUrl,
-			channelId,
-			channelUsername,
-			maxResults,
-		});
-		
-		console.log(`\n✅ Fetched ${videos.length} videos\n`);
-		
-		// Read current siteCopy file
-		const siteCopyPath = join(process.cwd(), "config", "siteCopy.turkish.ts");
-		let siteCopyContent = readFileSync(siteCopyPath, "utf-8");
-		
-		// Generate featured array from videos
-		const featuredVideos = videos.slice(0, Math.min(videos.length, 20)).map((video, index) => {
-			const year = new Date(video.publishedAt).getFullYear().toString();
-			const description = video.description
-				.substring(0, 150)
-				.replace(/\n/g, " ")
-				.trim();
-			return {
-				id: `project-${index + 1}`,
-				title: video.title.replace(/"/g, '\\"'),
-				category: "Video Prodüksiyonu",
-				description: description + (video.description.length > 150 ? "..." : ""),
-				videoUrl: video.videoUrl,
-				thumbnailUrl: video.thumbnailUrl,
-				year: year,
-			};
-		});
-		
-		// Create the featured array string in TypeScript format
-		const featuredArrayLines = featuredVideos.map((video, index) => {
-			const isLast = index === featuredVideos.length - 1;
-			return `\t\t\t{\n\t\t\t\tid: "${video.id}",\n\t\t\t\ttitle: "${video.title}",\n\t\t\t\tcategory: "${video.category}",\n\t\t\t\tdescription: "${video.description}",\n\t\t\t\tvideoUrl: "${video.videoUrl}",\n\t\t\t\tthumbnailUrl: "${video.thumbnailUrl}",\n\t\t\t\tyear: "${video.year}",\n\t\t\t}${isLast ? "" : ","}`;
-		});
-		
-		const featuredArrayString = `[\n${featuredArrayLines.join("\n")}\n\t\t]`;
-		
-		// Replace the featured array in siteCopy
-		const featuredRegex = /featured:\s*\[[\s\S]*?\]/;
-		if (featuredRegex.test(siteCopyContent)) {
-			siteCopyContent = siteCopyContent.replace(
-				featuredRegex,
-				`featured: ${featuredArrayString}`,
+		const videos = await getChannelUploadsByHandle(apiKey, handle, 20);
+		console.log(`Got ${videos.length} videos.`);
+		videos.forEach((v, i) => {
+			console.log(
+				`${i + 1}. ${v.title} (${new Date(v.publishedAt).toLocaleDateString()})`,
 			);
-			
-			writeFileSync(siteCopyPath, siteCopyContent, "utf-8");
-			console.log("✅ Updated siteCopy.turkish.ts with fetched videos\n");
-			console.log(`📝 Added ${featuredVideos.length} videos to the featured array\n`);
-		} else {
-			console.error("Could not find 'featured' array in siteCopy.turkish.ts");
-		}
-		
-		// Also show all videos for reference
-		console.log("📹 All fetched videos:\n");
-		videos.forEach((video, index) => {
-			console.log(`${index + 1}. ${video.title}`);
-			console.log(`   ${video.videoUrl}`);
-			console.log(`   Published: ${new Date(video.publishedAt).toLocaleDateString()}\n`);
+			console.log(`   ${v.videoUrl}`);
+			console.log(`   thumb: ${v.thumbnailUrl}`);
 		});
-		
-	} catch (error) {
-		console.error("Error fetching videos:", error);
-		process.exit(1);
+	} catch (err: any) {
+		console.error("Error:", err.message || err);
 	}
 }
 
 main();
-

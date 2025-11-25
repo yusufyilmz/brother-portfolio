@@ -8,8 +8,7 @@ const buttonVariants = cva(
 	{
 		variants: {
 			variant: {
-				default:
-					"bg-accent text-white shadow hover:bg-accent/90",
+				default: "bg-accent text-white shadow hover:bg-accent/90",
 				secondary:
 					"bg-surface text-ink border border-muted/30 shadow-sm hover:bg-surface/80",
 				ghost: "hover:bg-accent/10 hover:text-accent",
@@ -50,4 +49,3 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 export { Button, buttonVariants };
-

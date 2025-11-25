@@ -41,5 +41,6 @@ next-env.d.ts
 # GCP project ID
 .gcp-project-id
 
-# Large media files
+# Large media files (except hero video)
 public/media/*.mp4
+!public/media/hero.mp4

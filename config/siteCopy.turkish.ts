@@ -25,8 +25,8 @@ export const siteCopyTurkish = {
 		secondaryCtaLabel: "İletişime Geç",
 		secondaryCtaHref: "/contact",
 		highlightNote: "Projeler için müsait · [Konum] merkezli",
-		// Hero video veya görsel buraya eklenebilir
-		video: "/media/hero.mp4", // Gerçek dosya ile güncellenecek
+		// Hero video CDN'den sunuluyor
+		video: "https://files.catbox.moe/glutuj.mp4", // CDN hosted video
 	},
 	work: {
 		sectionTitle: "Seçilmiş Çalışmalar",

@@ -1,0 +1,47 @@
+# Media Files Directory
+
+Place all your media files (images, videos, thumbnails) in this directory.
+
+## Recommended Structure
+
+```
+/public/media/
+  ├── project-1-thumb.jpg
+  ├── project-2-thumb.jpg
+  ├── project-3-thumb.jpg
+  ├── about.jpg
+  ├── hero-reel.mp4 (optional)
+  └── photos/
+      ├── series-1/
+      │   ├── photo-1.jpg
+      │   ├── photo-2.jpg
+      │   └── photo-3.jpg
+      └── series-2/
+          └── ...
+```
+
+## File Naming Best Practices
+
+- Use lowercase letters
+- Use hyphens instead of spaces
+- Be descriptive but concise
+- Examples:
+  - ✅ `nike-commercial-2024.jpg`
+  - ✅ `urban-portraits-thumb.jpg`
+  - ❌ `IMG_1234.jpg`
+  - ❌ `My Project Thumbnail.jpg`
+
+## Recommended Sizes
+
+- **Thumbnails**: 1280x720px (16:9)
+- **About images**: 1200x1600px (3:4) or 1600x1200px (4:3)
+- **Photo gallery**: Max 2000px width
+- **Hero videos**: 1920x1080px, under 10MB if possible
+
+## Optimization
+
+Always optimize images before uploading:
+- Use tools like TinyPNG, Squoosh, or ImageOptim
+- Target file sizes: Thumbnails <200KB, Gallery images <500KB
+- Use JPG for photos, PNG for graphics with transparency
+

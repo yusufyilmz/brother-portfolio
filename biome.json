@@ -3,11 +3,11 @@
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
-		"useIgnoreFile": false
+		"useIgnoreFile": true
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": ["**/*.css"]
+		"ignore": ["**/*.css", ".next/**", "node_modules/**", "out/**", "build/**"]
 	},
 	"formatter": {
 		"enabled": true,

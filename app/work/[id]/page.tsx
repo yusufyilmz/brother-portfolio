@@ -7,9 +7,9 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 type WorkDetailPageProps = {
-	params: {
+	params: Promise<{
 		id: string;
-	};
+	}>;
 };
 
 export async function generateStaticParams() {
@@ -19,7 +19,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: WorkDetailPageProps) {
-	const work = siteCopy.work.featured.find((item) => item.id === params.id);
+	const { id } = await params;
+	const work = siteCopy.work.featured.find((item) => item.id === id);
 
 	if (!work) {
 		return {
@@ -33,8 +34,9 @@ export async function generateMetadata({ params }: WorkDetailPageProps) {
 	};
 }
 
-export default function WorkDetailPage({ params }: WorkDetailPageProps) {
-	const work = siteCopy.work.featured.find((item) => item.id === params.id);
+export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
+	const { id } = await params;
+	const work = siteCopy.work.featured.find((item) => item.id === id);
 
 	if (!work) {
 		notFound();
